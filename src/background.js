@@ -1,41 +1,27 @@
-let tabs = [];
-
 let restore = async () => {
     let sessions = await chrome.sessions.getRecentlyClosed();
     if (sessions.length <= 0) 
         return;
-    tabs = Object.fromEntries(sessions.map((session) => {
-        if (session?.tab)
-            return [session.tab.sessionId, session.tab.title]
-        else
-            return [session.window.sessionId, `(${session.window.tabs.length}) Chrome`]
+    let tabs = sessions.map(session => ({
+        id: session?.tab.sessionId || session.window.sessionId,
+        title: session?.tab.title || `(${session.window.tabs.length}) Chrome`
     }));
-    
     chrome.contextMenus.removeAll()
-    top_items = Object.entries(tabs).reverse().slice(0, 5);
-    sub_items = Object.entries(tabs).reverse().slice(5);
-    if (top_items) {
-        top_items.forEach((item) => {
+    for (let i in tabs) {
+        // add submenu if more than 6 items
+        if (i == 5) {
             chrome.contextMenus.create({
-                id: item[0],
-                title: item[1],
+                id: "closed-tabs",
+                title: "▶",
                 contexts: ["action"]
-            });
-        });
-    }
-    if (sub_items) {
+            });  
+        }
+        // create closed tab items
         chrome.contextMenus.create({
-            id: "closed-tabs",
-            title: "▶",
+            parentId: i < 5 ? null : "closed-tabs",
+            id: tabs[i].id,
+            title: tabs[i].title,
             contexts: ["action"]
-        });
-        sub_items.forEach((item) => {
-            chrome.contextMenus.create({
-                parentId: "closed-tabs",
-                id: item[0],
-                title: item[1],
-                contexts: ["action"]
-            });
         });
     }
 };

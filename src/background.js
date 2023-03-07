@@ -1,4 +1,4 @@
-let restore = async () => {
+let setTabsList = async () => {
     let sessions = await chrome.sessions.getRecentlyClosed();
     if (sessions.length <= 0) 
         return;
@@ -25,8 +25,8 @@ let restore = async () => {
         });
     }
 };
-restore();
+setTabsList();
 
-chrome.sessions.onChanged.addListener(() => restore());
+chrome.sessions.onChanged.addListener(() => setTabsList());
 chrome.contextMenus.onClicked.addListener((info, tab) => chrome.sessions.restore(info.menuItemId));
 chrome.action.onClicked.addListener(tab => chrome.sessions.restore());

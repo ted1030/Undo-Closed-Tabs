@@ -3,8 +3,8 @@ let setTabsList = async () => {
     if (sessions.length <= 0) 
         return;
     let tabs = sessions.map(session => ({
-        id: session?.tab.sessionId || session.window.sessionId,
-        title: session?.tab.title || `(${session.window.tabs.length}) Chrome`
+        id: session?.tab?.sessionId || session.window.sessionId,
+        title: session?.tab?.title || `(${session.window.tabs.length}) Chrome`
     }));
     chrome.contextMenus.removeAll()
     for (let i in tabs) {

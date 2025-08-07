@@ -1,24 +1,41 @@
+const i18n = {
+    'zh-TW': {
+        tabs: '個分頁',
+        more: '更多'
+    },
+    'en': {
+        tabs: 'tabs',
+        more: 'More'
+    }
+};
+
+const getLocale = () => {
+    const locale = chrome.i18n.getUILanguage();
+    return locale.startsWith('zh') ? 'zh-TW' : 'en';
+};
+
 let setTabsList = async () => {
     let sessions = await chrome.sessions.getRecentlyClosed();
     if (sessions.length <= 0) 
         return;
+    const currentLocale = getLocale();
     let tabs = sessions.map(session => ({
         id: session?.tab?.sessionId || session.window.sessionId,
-        title: session?.tab?.title || `(${session.window.tabs.length}) Chrome`
+        title: session?.tab?.title || `⌥ ${session.window.tabs.length} ${i18n[currentLocale].tabs}▸${session.window.tabs.map(tab => tab.title).join('｜')}`,
     }));
     chrome.contextMenus.removeAll()
     for (let i in tabs) {
         // add submenu if more than 6 items
         if (i == 5) {
             chrome.contextMenus.create({
-                id: "closed-tabs",
-                title: "▶",
-                contexts: ["action"]
+                id: "more-closed-tabs",
+                title: i18n[currentLocale].more + "…",
+                contexts: ["action"],
             });  
         }
         // create closed tab items
         chrome.contextMenus.create({
-            parentId: i < 5 ? null : "closed-tabs",
+            parentId: i < 5 ? null : "more-closed-tabs",
             id: tabs[i].id,
             title: tabs[i].title,
             contexts: ["action"]
